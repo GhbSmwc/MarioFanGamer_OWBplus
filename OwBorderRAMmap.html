@@ -10,6 +10,14 @@
 
 <div style="max-width:588px;">
 This document is a tool to figure out the number of bytes and the range as well as other statics of the overworld border plus.
+The byte format and pretty much everything else is almost identical to <a href="https://www.smwcentral.net/?p=profile&id=768">Kaijyuu</a>'s
+<a href="https://www.smwcentral.net/?p=section&a=details&id=16031">Super Status Bar patch</a>, including the tile data format
+(TTTTTTTT, YXPCCCTT).<br><br>
+
+Of course, you can use <a href="https://github.com/devinacker/bsnes-plus/releases">BSNES plus debugger</a>, go to <tt>Tools</tt> (Menubar)
+&rightarrow; <tt>Debugger ...</tt> &rightarrow; <tt>S-PPU</tt> (Menubar) &rightarrow; <tt>Tilemap Viewer</tt>, select layer 3 as the <tt>BG</tt>,
+enable &ldquo;Auto Update&rdquo; and &ldquo;Show Grid&rdquo;, and selecting the the tile and it will give you the coordinate (click image to expand):<br>
+<span id="OWBorderGid"><img width="100" onclick="ExpandImage()" src="OWBorderHTMLFiles/TileGrid.png"></span>
 <br><br>
 <tt>!TileRAM = $<input type="text" list="TileRAMList" id="TileRAM" value ="" maxlength="6"></tt><br>
 <datalist id="TileRAMList">
@@ -102,4 +110,11 @@ This document is a tool to figure out the number of bytes and the range as well 
 		return num <= min ? min : num >= max ? max : num;
 	}
 
+	function ExpandImage() {
+		document.getElementById("OWBorderGid").innerHTML = '<img onclick="ShrinkImage()" src="OWBorderHTMLFiles/TileGrid.png">'
+	}
+	
+	function ShrinkImage() {
+		document.getElementById("OWBorderGid").innerHTML = '<img onclick="ExpandImage()" width="100" src="OWBorderHTMLFiles/TileGrid.png">'
+	}
 </script>
