@@ -1,0 +1,65 @@
+<html>
+	<head>
+		<style>
+			table, th, td {
+			border: 1px solid black;
+			border-collapse: collapse;
+			}
+		</style>
+	</head>
+
+<div style="max-width:588px;">
+This document is a tool to figure out the number of bytes and the range as well as other statics of the overworld border plus.
+<br><br>
+<tt>!TileRAM = $<input type="text" list="TileRAMList" id="TileRAM" value ="" maxlength="6"></tt><br>
+<datalist id="TileRAMList">
+<option value="7FEC00">Default RAM address</option>
+<option value="41EC00">Default SA-1 RAM address</option>
+</datalist>
+<tt>!Top_Lines = <input type="number" id="TopLines" value="5" min="0" max="5" interval="1" onchange="CorrectTopLines()"></tt><br>
+<tt>!Bottom_Lines = <input type="number" id="BottomLines" value="2" min="0" max="2" interval="1" onchange="CorrectBottomLines()"></tt><br>
+<button type="button" onclick="Calculate()">Submit</button>
+<hr>
+
+</div>
+<span id="RAMTable"></span>
+<script>
+	function Calculate() {
+		var Output = "" //reset it when submit button pressed again.
+		var StartingRAM = document.getElementById("TileRAM").value
+		var NumbTopLines = document.getElementById("TopLines").value
+		var NumbBottomLines = document.getElementById("BottomLines").value
+		var TotalLines = parseInt(NumbTopLines) + parseInt(NumbBottomLines)
+		
+		Output += "<tt>Entire RAM range: $" + parseInt(StartingRAM, 16).toString(16) + " (!TileRAM+$0) to $" + (parseInt(StartingRAM, 16) + (TotalLines*64) + 1).toString(16) + " (!TileRAM+$" + ((TotalLines*64) + 1).toString(16) + ")</tt><br>"
+		Output += "<tt>Total bytes used: " + ((TotalLines*64)+2) + "</tt><br>"
+		if (NumbTopLines != 0) {
+			Output += "<tt>Top line(s) memory range: $" + parseInt(StartingRAM, 16).toString(16) + " (!TileRAM+$0) to $" + (parseInt(StartingRAM, 16) + ((NumbTopLines*64)-1)).toString(16) + " (!TileRAM+$" + ((NumbTopLines*64)-1).toString(16) +")</tt><br>"
+		}
+		if (NumbBottomLines != 0) {
+			Output += "<tt>Bottom line(s) memory range: $" + (parseInt(StartingRAM, 16) + (NumbTopLines*64)).toString(16) + " (!TileRAM+$" + (NumbTopLines*64).toString(16) + ") to $" + (parseInt(StartingRAM, 16) + (((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64)-1)).toString(16) + " (!TileRAM+$" + (((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64)-1).toString(16) + ")</tt><br>"
+		}
+		Output += "<tt>RAM address for !UploadFrames: $" + (parseInt(StartingRAM, 16) + ((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64)).toString(16) + " (!TileRAM+$" + ((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64).toString(16) + ")</tt><br>"
+		Output += "<tt>RAM address for !EnableUpload: $" + (parseInt(StartingRAM, 16) + ((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64)+1).toString(16) + " (!TileRAM+$" + (((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64)+1).toString(16) + ")</tt>"
+		
+		//Display by writing to HTML
+			document.getElementById("RAMTable").innerHTML = Output
+		
+	}
+	
+	function CorrectTopLines() {
+		var Input = document.getElementById("TopLines").value
+		CorrectedInput = Math.floor(clamp(Input, 0, 5))
+		document.getElementById("TopLines").value = CorrectedInput
+	}
+	function CorrectBottomLines() {
+		var Input = document.getElementById("BottomLines").value
+		CorrectedInput = Math.floor(clamp(Input, 0, 2))
+		document.getElementById("BottomLines").value = CorrectedInput
+	}
+	
+	function clamp(num, min, max) {
+		return num <= min ? min : num >= max ? max : num;
+	}
+
+</script>
