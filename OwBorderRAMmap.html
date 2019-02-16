@@ -16,7 +16,8 @@ The byte format and pretty much everything else is almost identical to <a href="
 
 Of course, you can use <a href="https://github.com/devinacker/bsnes-plus/releases">BSNES plus debugger</a>, go to <tt>Tools</tt> (Menubar)
 &rightarrow; <tt>Debugger ...</tt> &rightarrow; <tt>S-PPU</tt> (Menubar) &rightarrow; <tt>Tilemap Viewer</tt>, select layer 3 as the <tt>BG</tt>,
-enable &ldquo;Auto Update&rdquo; and &ldquo;Show Grid&rdquo;, and selecting the the tile and it will give you the coordinate (click image to expand):<br>
+enable &ldquo;Auto Update&rdquo; and &ldquo;Show Grid&rdquo;, and selecting the the tile and it will give you the coordinate (click image to expand)
+to CTRL+F here on this HTML file (note that leading zeros and spaces are omitted):<br>
 <span id="OWBorderGid"><img width="100" onclick="ExpandImage()" src="OWBorderHTMLFiles/TileGrid.png"></span>
 <br><br>
 <tt>!TileRAM = $<input type="text" list="TileRAMList" id="TileRAM" value ="" maxlength="6"></tt><br>
@@ -54,6 +55,7 @@ enable &ldquo;Auto Update&rdquo; and &ldquo;Show Grid&rdquo;, and selecting the 
 			var TilesAllCount = 0
 			var TopTilesCount = 0
 			var BottomTilesCount = 0
+			var LineCount = 0
 			if (parseInt(NumbTopLines) != 0) {
 				NumberOfTilesOnTopLines = 32*parseInt(NumbTopLines)
 				
@@ -61,6 +63,10 @@ enable &ldquo;Auto Update&rdquo; and &ldquo;Show Grid&rdquo;, and selecting the 
 				Output += "<table>"
 				Output += "<tr><th>What tile</th><th>Tile number byte (TTTTTTTT)</th><th>Tile properties byte (YXPCCCTT)</th></tr>"
 				while (TopTilesCount < NumberOfTilesOnTopLines) {
+					if ((TopTilesCount % 32) == 0) {
+						Output += "<tr><th colspan='3'>Row " + LineCount + "</th></tr>"
+						LineCount++
+					}
 					Output += "<tr>"
 					Output += "<td><tt>Tile: " + TilesAllCount + " ($" + (TilesAllCount).toString(16) + ") Position: (" + (TopTilesCount % 32) + "," + (Math.floor(TopTilesCount/32)) + ") (($" + (TopTilesCount % 32).toString(16) + ",$" + (Math.floor(TopTilesCount/32)).toString(16) + "))</tt></td>"
 					Output += "<td><tt>$" + (parseInt(StartingRAM, 16) + TilesAllCount*2).toString(16) + " (!TileRAM+$" + (TilesAllCount*2).toString(16) + ")</tt></td>"
@@ -79,6 +85,10 @@ enable &ldquo;Auto Update&rdquo; and &ldquo;Show Grid&rdquo;, and selecting the 
 				Output += "<table>"
 				Output += "<tr><th>What tile</th><th>Tile number byte (TTTTTTTT)</th><th>Tile properties byte (YXPCCCTT)</th></tr>"
 				while (BottomTilesCount < 32*parseInt(NumbBottomLines)) {
+					if ((BottomTilesCount % 32) == 0) {
+						Output += "<tr><th colspan='3'>Row " + LineCount + "</th></tr>"
+						LineCount++
+					}
 					Output += "<tr>"
 					Output += "<td><tt>Tile: " + TilesAllCount + " ($" + (TilesAllCount).toString(16) + ") Position: (" + (BottomTilesCount % 32) + "," + (Math.floor((BottomTilesCount/32)+26)) + ") (($" + (BottomTilesCount % 32).toString(16) + ",$" + (Math.floor((BottomTilesCount/32)+26)).toString(16) + "))</tt></td>"
 					Output += "<td><tt>$" + (parseInt(StartingRAM, 16) + TilesAllCount*2).toString(16) + " (!TileRAM+$" + (TilesAllCount*2).toString(16) + ")</tt></td>"
