@@ -17,6 +17,17 @@ The number of uploaded rows are variable too.
 
 How do I get the tile number?
 ----------------------------------------------------------
+Just like the Super Status bar patch, the data are stored
+like this:
+
+	!TileRAM+$00 : Top-leftmost tile number
+	!TileRAM+$01 : Same as above but tile properties
+	!TileRAM+$02 : Topmost, 2nd-leftmost tile number
+	!TileRAM+$03 : Same as above but tile properties
+	!TileRAM+$04 : Topmost, 3rd-leftmost tile number
+	!TileRAM+$05 : Same as above but tile properties
+	;...
+
 In an SNES screen, there can be up to 32 8x8 tiles per
 line on a tilemap. As such, there is kind of a linebreak
 at every 32nd tile. Because of that, the formula for the
@@ -100,13 +111,13 @@ left corner of the screen, this is position (0,27)
 	RAM_DisiredTile = $7FED80
 	
 GHB made a javascript HTML file that auto-calculates
-the needed information without having to re-calculate
-for every tile manually. This is useful for debugging
-and when creating an ASM file using the OW+ patch that
-doesn't use the function like most ASM resources that
-write to the status bar (!Define = $7FA000, instead of
-2 defines for each X and Y axis (!Define_X = $01,
-!Define_Y = $03)).
+the needed information as a table without having to
+re-calculate for every tile manually. This is useful
+for debugging and when creating an ASM file using the
+OW+ patch that doesn't use the function like most
+ASM resources that write to the status bar
+(!Define = $7FA000, instead of 2 defines for each X
+and Y axis (!Define_X = $01, !Define_Y = $03)).
 
 Fortunately, I have added a function which does the
 calculations for your including getting the correct RAM
@@ -200,14 +211,15 @@ Source: https://github.com/RPGHacker/SMW-Workspace/tree/master/patches/shared
 
 Do I must give you credits?
 ----------------------------------------------------------
-Not really (unless you want to uploed them somewhere
+Not really (unless you want to upload them somewhere
 else).
 And I guess, RPG Hacker (who created the functions file)
 wouldn't mind it either.
 
 Why did you make this patch?
 ----------------------------------------------------------
-It was a request by someone, hence why I made this.
+It was a request by someone (GreenHammerBro), hence why
+I made this.
 
 I've got a question!
 ----------------------------------------------------------
@@ -218,7 +230,7 @@ Is that really all?
 Since this patch uses RAM for the top and if desired the
 bottom part of the the border, any codes which modifies
 these parts should be thus adopted for this patch (I even
-delebritely used the same NMI hijack as the overworld
+deliberately used the same NMI hijack as the overworld
 counters, lol). One one side, this is mostly for practical
 reasons. After all, why should one waste NMI time when
 there is an alternative. :P
@@ -227,7 +239,7 @@ upload timing: The only tiles which ever gets updated are
 these codes which runs after my hijack (stripe image for
 example).
 A similar case happened with the extended level names and
-the extended extened version too. Both are unmodified
+the extended extended version too. Both are unmodified
 incompatible too but at least my patch includes the former
 (or rather a recreation but what ever).
 
@@ -239,3 +251,7 @@ Changelog
 1.1 (official release):
  - Added ability for a variable number of editable rows
  - Improvised tile function.
+
+1.2 (GHB's 2/16/2019 edit)
+ - Added a conversion "sheet" via a HTML javascript code.
+ - Readme edited for better understanding on some math parts.
