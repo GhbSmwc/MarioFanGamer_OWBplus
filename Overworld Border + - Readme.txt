@@ -18,15 +18,93 @@ The number of uploaded rows are variable too.
 How do I get the tile number?
 ----------------------------------------------------------
 In an SNES screen, there can be up to 32 8x8 tiles per
-line on a tilemap.
-As such, there is kind of a linebreak at every 32nd tile.
-Because of that, the formula for the tiles is (simplified)
-(X + $20 * Y) * 2. If you want to get it from e.g.
-position (30|4) then you get ($1E + $04 * $20) * 2
-= ($1E + $80) * 2 = $9E * 2 = $13C.
-For the bottom part, you have to add to Y the number of
-bottom lines and then subract the value by 28 or $1C.
-Fortunatelly, I have added a function which does the
+line on a tilemap. As such, there is kind of a linebreak
+at every 32nd tile. Because of that, the formula for the
+tiles is (simplified):
+
+	RAM_Offset = [(X + ($20 * Y)) * 2]
+
+	A number without a "$" prefix means decimal number.
+
+	X is the X position ranging from 0-31 ($00-$1F)
+	Y is the Y position ranging from 0 to [TotalLines-1].
+
+Example: position (30,4) (hex: ($1E,$04)):
+	!TileRAM = $7FEC00	;>If you haven't changed this RAM and
+				; are using a non-sa-1 ROM.
+
+	RAM_Offset = [($1E + ($20 * $04)) * 2]
+	RAM_Offset = [($1E + $80) * 2]
+	RAM_Offset = [($1E + $80) * 2]
+	RAM_Offset = [$9E * 2]
+	RAM_Offset = $13C
+
+	RAM_DisiredTile = $7FEC00 + $13C
+	RAM_DisiredTile = $7FED3C		;>Tile number address of (30,4)
+
+	If you want to find the address that it is the tile
+	properties (YXPCCCTT), add 1 to the address, in this
+	case, its $7FED3D.
+
+For the bottom part, the X position stays the same, but as
+you move down the next line past the last line on the top,
+you are now on the bottom section right after, as data for
+the top and bottom are contiguous to another (no gaps in
+between), here is an example:
+
+	!Top_Lines = 5		;\If you didn't change the values the number of rows.
+	!Bottom_Lines = 2	;/
+
+	Row 0 (Top part) Y = $00
+	Row 1 (Top part) Y = $01
+	Row 2 (Top part) Y = $02
+	Row 3 (Top part) Y = $03
+	Row 4 (Top part) Y = $04
+
+	Row 5 (Bottom part) Y = $1A
+	Row 6 (Bottom part) Y = $1B
+	
+Notice that the row number doesn't skip over, but the Y value does.
+This means you have to convert the Y position to a "row number of Y":
+
+	RowNumber = Y - ($1A - TopLines)
+	;Formula explanation: Get Y being the top row of the bottom down
+	;to zero via $1A-$1A, then add by the number of top rows to be
+	;at a location after the top row's final row.
+
+Here is an example, I want to edit a tile on the bottom
+left corner of the screen, this is position (0,27)
+(hex: ($00,$1B)):
+	!TileRAM = $7FEC00	;>If you haven't changed this RAM and
+				; are using a non-sa-1 ROM.
+	!Top_Lines = 5		;\If you didn't change the values the number of rows.
+	!Bottom_Lines = 2	;/
+
+	RowNumber = $1B - ($1A - $05)
+	RowNumber = $1B - ($1A - $05)
+	RowNumber = $1B - $15
+	RowNumber = $06
+	
+	;After converting Y, do the same step you would do for the
+	;top part:
+	
+	RAM_Offset = [($00 + ($20 * $06)) * 2]
+	RAM_Offset = [($00 + $C0) * 2]
+	RAM_Offset = [$C0 * 2]
+	RAM_Offset = $180
+	
+	RAM_DisiredTile = $7FEC00 + $180
+	RAM_DisiredTile = $7FED80
+	
+GHB made a javascript HTML file that auto-calculates
+the needed information without having to re-calculate
+for every tile manually. This is useful for debugging
+and when creating an ASM file using the OW+ patch that
+doesn't use the function like most ASM resources that
+write to the status bar (!Define = $7FA000, instead of
+2 defines for each axis).
+
+Fortunately, I have added a function which does the
 calculations for your including getting the correct RAM
 address.
 You are free to use that (and shared.asm in the folder
@@ -77,6 +155,14 @@ In case that the screen glitches but you can't see the
 border, you can simply set !EnableUpload to any non-zero
 value. That stops the border to upload tiles and saves a
 couple NMI time.
+
+GHB notes: you can disable the VRAM write by setting !EnableUpload
+to any nonzero number during events that would upload other
+tiles to the tilemap, since the OW border display is mainly
+a "heads-up-display" status bar for the OW, and that information
+presented (such as displaying coins, score, bonus stars) for
+most ASM hacks don't continuously change during the OW map, thus
+you can disable that during the expected NMI overflow.
 
 Help, I can't insert it!
 ----------------------------------------------------------

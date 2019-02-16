@@ -23,6 +23,17 @@ endif
 !BottomRowRAM = !TileRAM+(64*!Top_Lines)			;$7FED40 >ByteUsed = !Bottom_Lines*64 (128)
 !NonBorderRAM = !TileRAM+(64*(!Top_Lines+!Bottom_Lines))	;$7FEDC0 \        1 byte
 !UploadFrames = !NonBorderRAM					;$7FEDC0 /
-!EnableUpload = !NonBorderRAM+1					;$7FEDC1 >        1 byte
+!EnableUpload = !NonBorderRAM+1					;$7FEDC1 >        1 byte (if nonzero, does not upload)
 ;
 ;In total bytes required using default values, should take 450 ($1C2) bytes.
+
+print ""
+if !Top_Lines != 0
+	print "Top row RAM: $", hex(!TopRowRAM), " to $", hex((!BottomRowRAM-1))
+endif
+if !Bottom_Lines != 0
+	print "Bottom row RAM: $", hex(!BottomRowRAM), " to $", hex((!NonBorderRAM-1))
+endif
+print "Upload frame counter: $", hex(!UploadFrames)
+print "EnableUpload (disables when nonzero): $", hex(!EnableUpload)
+print ""
