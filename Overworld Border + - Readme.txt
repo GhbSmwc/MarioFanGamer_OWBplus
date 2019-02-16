@@ -23,11 +23,14 @@ at every 32nd tile. Because of that, the formula for the
 tiles is (simplified):
 
 	RAM_Offset = [(X + ($20 * Y)) * 2]
-
-	A number without a "$" prefix means decimal number.
-
 	X is the X position ranging from 0-31 ($00-$1F)
 	Y is the Y position ranging from 0 to [TotalLines-1].
+
+after finding the offset, then you do this:
+
+	RAM_DisiredTile = !TileRAM + RAM_Offset
+
+NOTE: A number without a "$" prefix means decimal number.
 
 Example: position (30,4) (hex: ($1E,$04)):
 	!TileRAM = $7FEC00	;>If you haven't changed this RAM and
@@ -102,7 +105,8 @@ for every tile manually. This is useful for debugging
 and when creating an ASM file using the OW+ patch that
 doesn't use the function like most ASM resources that
 write to the status bar (!Define = $7FA000, instead of
-2 defines for each axis).
+2 defines for each X and Y axis (!Define_X = $01,
+!Define_Y = $03)).
 
 Fortunately, I have added a function which does the
 calculations for your including getting the correct RAM
