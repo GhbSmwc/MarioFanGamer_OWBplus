@@ -44,12 +44,14 @@
 	RTL
 ;Another example: Write "TEST":
 	
+	!WritePosition = $7FEC00 ;>Change to $41EC00 for SA-1
+	
 	main:
-	;Make sure you use fixed-width font in your text editor!
+	;Make sure you use fixed-width font in your text editor (uses ASCII art)!
 	;|----------Tile Number---------|   |-------------Tile Properties-----------|
 	;V                              V   V                                       V
-	LDA #$13 : STA !WritePosition+$00 : LDA.b #%00111001 : STA !WritePosition+$01 ;>"T"
-	LDA #$04 : STA !WritePosition+$02 : LDA.b #%00111001 : STA !WritePosition+$03 ;>"E"
-	LDA #$12 : STA !WritePosition+$04 : LDA.b #%00111001 : STA !WritePosition+$05 ;>"S"
-	LDA #$13 : STA !WritePosition+$06 : LDA.b #%00111001 : STA !WritePosition+$07 ;>"T"
+	LDA #$13 : STA !WritePosition+$00 : LDA.b #%00111001 : STA !WritePosition+$01 ;>Tile $13 is "T"
+	LDA #$04 : STA !WritePosition+$02 : LDA.b #%00111001 : STA !WritePosition+$03 ;>Tile $04 is "E"
+	LDA #$12 : STA !WritePosition+$04 : LDA.b #%00111001 : STA !WritePosition+$05 ;>Tile $12 is "S"
+	LDA #$13 : STA !WritePosition+$06 : LDA.b #%00111001 : STA !WritePosition+$07 ;>Tile $13 is "T"
 	RTL
