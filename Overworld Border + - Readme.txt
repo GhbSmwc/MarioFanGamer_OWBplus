@@ -255,3 +255,4 @@ Changelog
 1.2 (GHB's 2/16/2019 edit)
  - Added a conversion "sheet" via a HTML javascript code.
  - Readme edited for better understanding on some math parts.
+ - Upon patching via Asar, now displays the memory statics.
