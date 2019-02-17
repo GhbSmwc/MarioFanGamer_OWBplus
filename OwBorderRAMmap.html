@@ -17,7 +17,7 @@ The byte format and pretty much everything else is almost identical to <a href="
 Of course, you can use <a href="https://github.com/devinacker/bsnes-plus/releases">BSNES plus debugger</a>, go to <tt>Tools</tt> (Menubar)
 &rightarrow; <tt>Debugger ...</tt> &rightarrow; <tt>S-PPU</tt> (Menubar) &rightarrow; <tt>Tilemap Viewer</tt>, select layer 3 as the <tt>BG</tt>,
 enable &ldquo;Auto Update&rdquo; and &ldquo;Show Grid&rdquo;, and selecting the the tile and it will give you the coordinate (click image to expand)
-to CTRL+F here on this HTML file (note that leading zeros and spaces are omitted):<br>
+to CTRL+F here on this HTML file (note that leading zeros and spaces are omitted, and if the future version uses hex numbers, use &ldquo;$&rdquo;):<br>
 <span id="OWBorderGid"><img width="100" onclick="ExpandImage()" src="OWBorderHTMLFiles/TileGrid.png"></span>
 <br><br>
 <tt>!TileRAM = $<input type="text" list="TileRAMList" id="TileRAM" value ="" maxlength="6"></tt><br>
@@ -40,8 +40,8 @@ to CTRL+F here on this HTML file (note that leading zeros and spaces are omitted
 		var NumbBottomLines = document.getElementById("BottomLines").value
 		var TotalLines = parseInt(NumbTopLines) + parseInt(NumbBottomLines)
 		
+		Output += "<tt>Total RAM bytes used: " + ((TotalLines*64)+2) + " ($" + ((TotalLines*64)+2).toString(16) + ")</tt><br>"
 		Output += "<tt>Entire RAM range: $" + parseInt(StartingRAM, 16).toString(16) + " (!TileRAM+$0) to $" + (parseInt(StartingRAM, 16) + (TotalLines*64) + 1).toString(16) + " (!TileRAM+$" + ((TotalLines*64) + 1).toString(16) + ")</tt><br>"
-		Output += "<tt>Total bytes used: " + ((TotalLines*64)+2) + " ($" + ((TotalLines*64)+2).toString(16) + ")</tt><br>"
 		if (NumbTopLines != 0) {
 			Output += "<tt>Top line(s) memory range: $" + parseInt(StartingRAM, 16).toString(16) + " (!TileRAM+$0) to $" + (parseInt(StartingRAM, 16) + ((NumbTopLines*64)-1)).toString(16) + " (!TileRAM+$" + ((NumbTopLines*64)-1).toString(16) +")</tt><br>"
 		}
