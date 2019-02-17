@@ -28,6 +28,7 @@ endif
 ;In total bytes required using default values, should take 450 ($1C2) bytes.
 
 print ""
+print "Total RAM bytes used: ", dec((!Top_Lines*64)+(!Bottom_Lines*64)+2), " (Hex: $", hex((!Top_Lines*64)+(!Bottom_Lines*64)+2), ")"
 if !Top_Lines != 0
 	print "Top row RAM: $", hex(!TopRowRAM), " to $", hex((!BottomRowRAM-1))
 endif
