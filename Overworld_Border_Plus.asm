@@ -49,25 +49,25 @@ org $05DBF2|!bank
 	STA !EnableUpload
 
 	if !Enable_Lives_Display
-		LDX #$00
-		LDA $0DB3|!addr
+		LDX #$00						;\Which player (Mario and Luigi) to display their lives
+		LDA $0DB3|!addr						;|(Didn't use "0DB3|!addr,x" in the case should it be a number greater than $01).
 		
-		BEQ +
-		LDX #$01
-	+	LDA $0DB4|!addr,x
-		INC
-		JSR $DC3A		; Hex 2 Dec
-		CPX #$00
-		BEQ +
-		CLC : ADC #$22
-		STA.l get_border_RAM(!Lives_X+1, !Lives_Y)	; ($009|$004)
-		LDA #$39
-		STA.l get_border_RAM(!Lives_X+1, !Lives_Y)+1
-		TXA
-	+	CLC : ADC #$22
-		STA.l get_border_RAM(!Lives_X, !Lives_Y)	; ($008|$004)
-		LDA #$39
-		STA.l get_border_RAM(!Lives_X, !Lives_Y)+1
+		BEQ +							;|
+		LDX #$01						;/
+	+	LDA $0DB4|!addr,x					;\$0DB4,x is the current player's lives, minus 1 (so if your lives HUD display says 1, its 0 on this RAM)
+		INC							;/which is why an INC here is needed.
+		JSR $DC3A						;>Hex 2 Dec (converts a value in A (8-bit), to BCD with X = 10s and A = 1s)
+		CPX #$00						;\If the player's lives is 0-9 (only a single digit was needed to display), skip writing a leading zero.
+		BEQ +							;/
+		CLC : ADC #$22						;>Convert digit value to overworld digits (a digit 0 is located at tile number $22, 1 -> $23, 2 -> $24 and so on.)
+		STA.l get_border_RAM(!Lives_X+1, !Lives_Y)		;>Write ones digit ($009|$004)
+		LDA #$39						;\Tile properties for the ones digit
+		STA.l get_border_RAM(!Lives_X+1, !Lives_Y)+1		;/
+		TXA							;>X (Tens digit) -> A
+	+	CLC : ADC #$22						;>Convert to overworld digits.
+		STA.l get_border_RAM(!Lives_X, !Lives_Y)		;>Write tens digit ($008|$004)
+		LDA #$39						;\Tile properties for the tens digit
+		STA.l get_border_RAM(!Lives_X, !Lives_Y)+1		;/
 	endif
 RTL
 warnpc $05DC40|!bank

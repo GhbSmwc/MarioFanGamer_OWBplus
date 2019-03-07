@@ -15,6 +15,15 @@ editable too!
 This patch also enables to edit the border's properties.
 The number of uploaded rows are variable too.
 
+How do I install this patch?
+----------------------------------------------------------
+Installation is simple, just make sure you save after
+editing the overworld level names, as LM have a hijack
+at $048E81 to $048E8A (10 bytes) then patch
+[Overworld_Border_Plus.asm] with asar. This patch does
+have a protection against unintentional corruption using
+the "assert" check so don't worry.
+
 How do I get the tile number?
 ----------------------------------------------------------
 Just like the Super Status bar patch, the data are stored
@@ -113,7 +122,7 @@ left corner of the screen, this is position (0,27)
 GHB made a javascript HTML file that auto-calculates
 the needed information as a table without having to
 re-calculate for every tile manually. This is useful
-for debugging and when creating an ASM file using the
+for debugging and when creating an ASM files using the
 OW+ patch that doesn't use the function like most
 ASM resources that write to the status bar
 (!Define = $7FA000, instead of 2 defines for each X
