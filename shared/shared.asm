@@ -1,4 +1,4 @@
-@asar 1.37
+@asar 1.50
 
 ; Using !shared_asm_included as an include guard here so that this file can be
 ; included from multiple source files at once without causing redefinitions	
@@ -20,12 +20,14 @@ if !shared_asm_included == 0
 	; Private section
 		
 	{	
-		; Check if we're in an SA-1 ROM
-		; If so, enable SA-1 mapping
+		; Check if we're in a SuperFX or SA-1 ROM
+		; If so, enable the respective mapping
 	
 		!use_sa1_mapping = 0
+		!use_sfx_mapping = 0
+		!disable_fastrom_remap ?= 0			; Using ?= here so that someone can disable it from the outside if they desire so
 		
-		!num_sprite_table_slots = 12		; The number of sprite slots available (12 in regular ROM, 22 in SA-1 ROM)
+		!num_sprite_table_slots = 12		; The number of sprite slots available (12 in regular or SuperFX ROM, 22 in SA-1 ROM)
 		
 		if read1($00FFD5) == $23
 			!use_sa1_mapping = 1
@@ -33,22 +35,13 @@ if !shared_asm_included == 0
 			!num_sprite_table_slots = 22
 			
 			sa1rom
+		elseif read1($00FFD6) > $02 && read1($00FFD6)&$F0 == $10
+			!use_sfx_mapping = 1
+			
+			sfxrom
 		endif
 		
-
-		
-
-		
-		; Returns 1 if value <= 0 and 0 otherwise
-		; For internal use only
-		
-		function is_less_equal_zero(value) = (value-1)>>31
-		
-		
-		; Returns 1 if value > 0 and 0 otherwise
-		; For internal use only
-		
-		function is_greater_zero(value) = 1-((value-1)>>31)
+		!disable_fastrom_remap #= or(!disable_fastrom_remap,or(!use_sa1_mapping,!use_sfx_mapping))
 	}
 	
 	
@@ -58,12 +51,7 @@ if !shared_asm_included == 0
 	
 	; Returns the absolute value of value
 	
-	function abs(value) = (is_greater_zero(value)*value)+(is_less_equal_zero(value)*(-value))
-	
-	
-	; Returns false if statement == 0 and true otherwise, but only works reliably for integers
-	
-	function select(statement, true, false) = false+((true-false)*is_greater_zero(abs(statement)))
+	function abs(value) = select(less(value, 0), value*-1, value)
 	
 	
 	; Returns 1 if value > 0, -1 if value < 0 and 0 otherwise
@@ -78,82 +66,6 @@ if !shared_asm_included == 0
 	
 	
 	
-	
-	; Returns 1 if value == 0 and 0 otherwise
-	
-	function not(value) = 1-is_greater_zero(abs(value))
-	
-	
-	; Returns 1 if val_a == val_b and 0 otherwise
-	
-	function equal(val_a, val_b) = not(val_a-val_b)
-	
-	
-	; Returns 1 if val_a < val_b and 0 otherwise
-	
-	function less(val_a, val_b) = is_greater_zero(val_b-val_a)
-	
-	
-	; Returns 1 if val_a > val_b and 0 otherwise
-	
-	function greater(val_a, val_b) = is_greater_zero(val_a-val_b)
-	
-	
-	; Returns 1 if val_a <= val_b and 0 otherwise
-	
-	function less_equal(val_a, val_b) = is_less_equal_zero(val_a-val_b)
-	
-	
-	; Returns 1 if val_a >= val_b and 0 otherwise
-	
-	function greater_equal(val_a, val_b) = is_less_equal_zero(val_b-val_a)
-	
-	
-	
-	
-	
-	; Returns 1 if (val_a != 0) && (val_b != 0) and 0 otherwise
-	
-	function logical_and(val_a, val_b) = not(not(val_a*val_b))
-	
-	
-	; Returns 0 if (val_a != 0) && (val_b != 0) and 1 otherwise
-	
-	function logical_nand(val_a, val_b) = not(logical_and(val_a, val_b))
-	
-	
-	; Returns 1 if (val_a != 0) || (val_b != 0) and 0 ohterwise
-	
-	function logical_or(val_a, val_b) = logical_nand(logical_nand(val_a, val_a), logical_nand(val_b, val_b))
-	
-	
-	; Returns 0 if (val_a != 0) || (val_b != 0) and 1 ohterwise
-	
-	function logical_nor(val_a, val_b) = logical_nand(logical_nand(val_a, val_a), logical_nand(val_b, val_b))
-	
-	
-	; Returns 1 if ((val_a != 0) && (val_b == 0)) || ((val_a == 0) && (val_b != 0)) and 0 otherwise
-	
-	function logical_xor(val_a, val_b) = logical_and(logical_or(val_a, val_b), not(logical_and(val_a, val_b)))
-	
-	
-	
-	
-	
-	; Returns val_a if val_a < val_b and val_b otherwise
-	
-	function min(val_a, val_b) = select(less(val_a, val_b), val_a, val_b)
-	
-	
-	; Returns val_a if val_a > val_b and val_b otherwise
-	
-	function max(val_a, val_b) = select(greater(val_a, val_b), val_a, val_b)
-	
-	
-	; Returns minimum if value < minimum, maximum if value > maximum and value otherwise
-	
-	function clamp(value, minimum, maximum) = select(less(value, minimum), minimum, select(greater(value, maximum), maximum, value))		
-		
 	
 	; Returns value if value > 0 and 0 otherwise
 	
@@ -175,7 +87,7 @@ if !shared_asm_included == 0
 		; Remaps address to new_base if range_start <= address <= range_end
 		; For internal use only
 		
-		function remap_range(address, range_start, range_end, new_base) = select(greater_equal(address, range_start), select(less_equal(address, range_end), address-range_start+new_base, address), address)
+		function remap_range(address, range_start, range_end, new_base) = select(greaterequal(address, range_start), select(lessequal(address, range_end), address-range_start+new_base, address), address)
 		
 		
 		; Remaps address to new_base if address == comparand
@@ -188,7 +100,7 @@ if !shared_asm_included == 0
 		; Returns 1 if bank_byte lies in a range of banks where mirrors exist from $0000 to $7FFF and 0 otherwise
 		; For internal use only
 		
-		function has_mirrors(bank_byte) = not(logical_or(logical_and(greater_equal(bank_byte, $40), less_equal(bank_byte, $7F)), logical_and(greater_equal(bank_byte, $C0), less_equal(bank_byte, $FF))))
+		function has_mirrors(bank_byte) = not(or(and(greaterequal(bank_byte, $40), lessequal(bank_byte, $7F)), and(greaterequal(bank_byte, $C0), lessequal(bank_byte, $FF))))
 		
 		
 		
@@ -196,7 +108,7 @@ if !shared_asm_included == 0
 		; between $7E0000 and $7E1FFF, otherwise returns 0
 		; For internal use only
 		
-		function has_ram_mirrors(current_pc, address) = logical_and(has_mirrors(get_bank_byte(current_pc)), logical_and(greater_equal(address, $7E0000), less_equal(address, $7E1FFF)))
+		function has_ram_mirrors(current_pc, address) = and(has_mirrors(get_bank_byte(current_pc)), and(greaterequal(address, $7E0000), lessequal(address, $7E1FFF)))
 		
 		
 		
@@ -204,7 +116,7 @@ if !shared_asm_included == 0
 		; lies within range mirror_range_start to mirror_range_end and mirrors exist inside the bank current_pc lies in
 		; For internal use only
 		
-		function shorten_if_in_range(current_pc, address, bank_range_start, bank_range_end, mirror_range_start, mirror_range_end) =	select(logical_and(logical_or(has_mirrors(get_bank_byte(current_pc)), has_ram_mirrors(current_pc, address)), logical_and(greater_equal(get_bank_byte(address), bank_range_start), less_equal(get_bank_byte(address), bank_range_end))), remap_range(address, (address&$FF0000)|mirror_range_start, (address&$FF0000)|mirror_range_end, $000000|mirror_range_start), address)
+		function shorten_if_in_range(current_pc, address, bank_range_start, bank_range_end, mirror_range_start, mirror_range_end) =	select(and(or(has_mirrors(get_bank_byte(current_pc)), has_ram_mirrors(current_pc, address)), and(greaterequal(get_bank_byte(address), bank_range_start), lessequal(get_bank_byte(address), bank_range_end))), remap_range(address, (address&$FF0000)|mirror_range_start, (address&$FF0000)|mirror_range_end, $000000|mirror_range_start), address)
 		
 		
 		
@@ -234,22 +146,22 @@ if !shared_asm_included == 0
 	
 	; Public section
 	
-	; Maps a RAM address correctly, depending on whether we need SA-1 mapping or not
+	; Maps a RAM address correctly, depending on whether we need SA-1/SuperFX mapping or not
 	
-	function remap_ram(address) = select(!use_sa1_mapping, remap_address(remap_address(remap_address(remap_address(remap_address(remap_range(remap_range(remap_range(remap_range(remap_range(remap_range(remap_range(remap_sprite_table_ram(shorten_if_mirrored(!current_pc, address)), $0000, $00FF, $3000), $0100, $1FFF, $6100), $7EC800, $7EFFFF, $40C800), $7FC800, $7FFFFF, $41C800), $7F9A7B, $7F9C7A, $418800), $700000, $7007FF, $41C000), $700800, $7027FF, $41A000), $7FAB10, $6040), $7FAB1C, $6056), $7FAB28, $6057), $7FAB34, $606D), $7FAB9E, $6083), address)
+	function remap_ram(address) = select(!use_sa1_mapping, remap_address(remap_address(remap_address(remap_address(remap_address(remap_range(remap_range(remap_range(remap_range(remap_range(remap_range(remap_range(remap_sprite_table_ram(shorten_if_mirrored(!current_pc, address)), $0000, $00FF, $3000), $0100, $1FFF, $6100), $7EC800, $7EFFFF, $40C800), $7FC800, $7FFFFF, $41C800), $7F9A7B, $7F9C7A, $418800), $700000, $7007FF, $41C000), $700800, $7027FF, $41A000), $7FAB10, $6040), $7FAB1C, $6056), $7FAB28, $6057), $7FAB34, $606D), $7FAB9E, $6083), select(!use_sfx_mapping, remap_range(remap_range(remap_range(shorten_if_mirrored(!current_pc, address), $0000, $1FFF, $6000), $7EC800, $7EFFFF, $70C800), $7FC800, $7FFFFF, $71C800), address))
 	
 	
 	
-	; Maps a ROM address correctly, depending on whether we need SA-1 mapping or not
+	; Maps a ROM address correctly, depending on whether we need SA-1/SuperFX mapping or not
 	; NOTE: This doesn't work in conjunction with autoclean, because autoclean is lazy and just treats the function as a label instead of resolving it
 	
-	function remap_rom(address) = address|select(!use_sa1_mapping, $000000, $800000)
+	function remap_rom(address) = address|select(!disable_fastrom_remap, $000000, $800000)
 	
 	
 	
-	; Maps a bank correctly, depending on whether we need SA-1 mapping or not
+	; Maps a bank correctly, depending on whether we need SA-1/SuperFX mapping or not
 	
-	function remap_bank(bankbyte) = bankbyte|select(!use_sa1_mapping, $00, $80)
+	function remap_bank(bankbyte) = bankbyte|select(!disable_fastrom_remap, $00, $80)
 	
 	
 	
@@ -278,11 +190,6 @@ if !shared_asm_included == 0
 	function ceiling(decimal_number) = -floor(-decimal_number)
 	
 	
-	; Returns decimal_number rounded to nearest integer value
-	
-	function round(decimal_number) = trunc(decimal_number+(sign(decimal_number)*0.5))
-	
-	
 	
 	; Now some helper functions for working with fixed point values (as used by mode 7, for example)
 	; When working with decimal numbers, make sure to put "math round off" somewhere at the top of your patch, otherwise you'll get ridiculous results
@@ -303,7 +210,7 @@ if !shared_asm_included == 0
 	
 	; Converts a decimal number to a 16-bit signed fixed point representation (such as used by mode 7)
 	
-	function decimal_to_fixed_16(decimal_number) = (min(round((clamp(decimal_number, -128, 128)+128)*$100)|0, $FFFF)+$8000)&$FFFF
+	function decimal_to_fixed_16(decimal_number) = (min(round((clamp(decimal_number, -128, 128)+128)*$100, 0)|0, $FFFF)+$8000)&$FFFF
 	
 	
 	; Converts a 16-bit fixed point representation to a decimal number
@@ -359,5 +266,11 @@ if !shared_asm_included == 0
 		endif
 	endmacro
 	
+	
+	
+	; Includes
+	
+	incsrc includes/print_implementation.asm
+	incsrc includes/ram_getters.asm
 		
 endif
