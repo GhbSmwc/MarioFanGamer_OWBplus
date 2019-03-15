@@ -269,3 +269,8 @@ Changelog
    statics.
  - [sample_writes.asm] was added for anyone wanting to
    know how to write on the overworld border.
+1.2.1 (GHB's fixes of above) [3/15/2019]
+ - Fixed the problem that Majorflare and Shiny Ninetales
+   reported that asar version 1.71 handles macros and some
+   other functions differently, causing [shared/shared.asm]
+   to be broken and causing the patch to not work properly.

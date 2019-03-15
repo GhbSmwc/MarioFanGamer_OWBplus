@@ -1,4 +1,4 @@
-!Enable_Extended_Level_Names	= !no			; Change it to "!yes" to enable it
+!Enable_Extended_Level_Names	= !yes			; Change it to "!yes" to enable it
 !Enable_Lives_Display			= !yes			; Change it to "!no" to disable it
 
 !Top_Lines						= 5
