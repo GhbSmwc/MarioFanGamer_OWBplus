@@ -42,9 +42,9 @@ line on a tilemap. As such, there is kind of a linebreak
 at every 32nd tile. Because of that, the formula for the
 tiles is (simplified):
 
-	RAM_Offset = [(X + ($20 * Y)) * 2]
+	RAM_Offset = (X + ($20 * Y)) * 2
 	X is the X position ranging from 0-31 ($00-$1F)
-	Y is the Y position ranging from 0 to [TotalLines-1].
+	Y is the Y position ranging from 0 to (TotalLines-1).
 
 after finding the offset, then you do this:
 
@@ -56,10 +56,10 @@ Example: position (30,4) (hex: ($1E,$04)):
 	!TileRAM = $7FEC00	;>If you haven't changed this RAM and
 				; are using a non-sa-1 ROM.
 
-	RAM_Offset = [($1E + ($20 * $04)) * 2]
-	RAM_Offset = [($1E + $80) * 2]
-	RAM_Offset = [($1E + $80) * 2]
-	RAM_Offset = [$9E * 2]
+	RAM_Offset = ($1E + ($20 * $04)) * 2
+	RAM_Offset = ($1E + $80) * 2
+	RAM_Offset = ($1E + $80) * 2
+	RAM_Offset = $9E * 2
 	RAM_Offset = $13C
 
 	RAM_DisiredTile = $7FEC00 + $13C
@@ -111,9 +111,9 @@ left corner of the screen, this is position (0,27)
 	;After converting Y, do the same step you would do for the
 	;top part:
 	
-	RAM_Offset = [($00 + ($20 * $06)) * 2]
-	RAM_Offset = [($00 + $C0) * 2]
-	RAM_Offset = [$C0 * 2]
+	RAM_Offset = ($00 + ($20 * $06)) * 2
+	RAM_Offset = ($00 + $C0) * 2
+	RAM_Offset = $C0 * 2
 	RAM_Offset = $180
 	
 	RAM_DisiredTile = $7FEC00 + $180
