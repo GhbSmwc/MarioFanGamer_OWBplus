@@ -27,30 +27,65 @@ to CTRL+F here on this HTML file (note that leading zeros and spaces are omitted
 </datalist>
 <kbd>!Top_Lines = <input type="number" id="TopLines" value="5" min="0" max="5" interval="1" onchange="CorrectTopLines()"></kbd><br>
 <kbd>!Bottom_Lines = <input type="number" id="BottomLines" value="2" min="0" max="2" interval="1" onchange="CorrectBottomLines()"></kbd><br>
-<button type="button" onclick="Calculate()">Submit</button>
+<button type="button" onclick="Calculate()">Submit</button><button type="button" onclick="Reset()">Reset</button>
 <hr>
 
 </div>
 <span id="RAMTable"></span>
 <script>
+	function Reset() {
+		document.getElementById("TopLines").value = "5"
+		document.getElementById("BottomLines").value = "2"
+		document.getElementById("TileRAM").value = ""
+		document.getElementById("RAMTable").innerHTML = ""
+	}
 	function Calculate() {
-		var Output = "" //reset it when submit button pressed again.
-		var StartingRAM = document.getElementById("TileRAM").value
-		var NumbTopLines = document.getElementById("TopLines").value
-		var NumbBottomLines = document.getElementById("BottomLines").value
-		var TotalLines = parseInt(NumbTopLines) + parseInt(NumbBottomLines)
-		
-		Output += "<kbd>Total RAM bytes used: " + ((TotalLines*64)+2) + " ($" + ((TotalLines*64)+2).toString(16) + ")</kbd><br>"
-		Output += "<kbd>Entire RAM range: $" + parseInt(StartingRAM, 16).toString(16) + " (!TileRAM+$0) to $" + (parseInt(StartingRAM, 16) + (TotalLines*64) + 1).toString(16) + " (!TileRAM+$" + ((TotalLines*64) + 1).toString(16) + ")</kbd><br>"
-		if (NumbTopLines != 0) {
-			Output += "<kbd>Top line(s) memory range: $" + parseInt(StartingRAM, 16).toString(16) + " (!TileRAM+$0) to $" + (parseInt(StartingRAM, 16) + ((NumbTopLines*64)-1)).toString(16) + " (!TileRAM+$" + ((NumbTopLines*64)-1).toString(16) +")</kbd><br>"
-		}
-		if (NumbBottomLines != 0) {
-			Output += "<kbd>Bottom line(s) memory range: $" + (parseInt(StartingRAM, 16) + (NumbTopLines*64)).toString(16) + " (!TileRAM+$" + (NumbTopLines*64).toString(16) + ") to $" + (parseInt(StartingRAM, 16) + (((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64)-1)).toString(16) + " (!TileRAM+$" + (((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64)-1).toString(16) + ")</kbd><br>"
-		}
-		Output += "<kbd>RAM address for !UploadFrames: $" + (parseInt(StartingRAM, 16) + ((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64)).toString(16) + " (!TileRAM+$" + ((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64).toString(16) + ")</kbd><br>"
-		Output += "<kbd>RAM address for !EnableUpload: $" + (parseInt(StartingRAM, 16) + ((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64)+1).toString(16) + " (!TileRAM+$" + (((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64)+1).toString(16) + ")</kbd>"
-		
+		//reset it when submit button pressed again.
+			var Output = ""
+		//Prevent displaying invalid RAM address
+			var StartingRAM = parseInt(document.getElementById("TileRAM").value, 16)
+			if (isNaN(StartingRAM) == true) {
+				StartingRAM = parseInt("7FEC00", 16)
+				document.getElementById("TileRAM").value = "7FEC00"
+			} else {
+				StartingRAM = clamp(StartingRAM, parseInt("0", 16), parseInt("FFFFFF", 16))
+				document.getElementById("TileRAM").value = StartingRAM.toString(16)
+			}
+		//find out how many lines the user have entered
+			var NumbTopLines = document.getElementById("TopLines").value
+			var NumbBottomLines = document.getElementById("BottomLines").value
+			var TotalLines = parseInt(NumbTopLines) + parseInt(NumbBottomLines)
+		//Memory summary table
+			Output += "<table>"
+			Output += "<tr>"
+			Output += "<td><kbd>Total RAM bytes used:</kbd></td>"
+			Output += "<td><kbd>$" + ((TotalLines*64)+2) + " ($" + ((TotalLines*64)+2).toString(16) + ")</kbd></td>"
+			Output += "</tr>"
+			Output += "<tr>"
+			Output += "<td><kbd>Entire RAM range:</kbd></td>"
+			Output += "<td><kbd>$" + StartingRAM.toString(16) + " (!TileRAM+$0) to $" + (StartingRAM + (TotalLines*64) + 1).toString(16) + " (!TileRAM+$" + ((TotalLines*64) + 1).toString(16) + ")</kbd></td>"
+			Output += "</tr>"
+			if (NumbTopLines != 0) {
+				Output += "<tr>"
+				Output += "<td><kbd>Top line(s) memory range:</kbd></td>"
+				Output += "<td><kbd>$" + StartingRAM.toString(16) + " (!TileRAM+$0) to $" + (StartingRAM + ((NumbTopLines*64)-1)).toString(16) + " (!TileRAM+$" + ((NumbTopLines*64)-1).toString(16) +")</kbd></td>"
+				Output += "</tr>"
+			}
+			if (NumbBottomLines != 0) {
+				Output += "<tr>"
+				Output += "<td><kbd>Bottom line(s) memory range:</kbd></td>"
+				Output += "<td><kbd>$" + (StartingRAM + (NumbTopLines*64)).toString(16) + " (!TileRAM+$" + (NumbTopLines*64).toString(16) + ") to $" + (StartingRAM + (((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64)-1)).toString(16) + " (!TileRAM+$" + (((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64)-1).toString(16) + ")</kbd></td>"
+				Output += "</tr>"
+			}
+			Output += "<tr>"
+			Output += "<td><kbd>RAM address for !UploadFrames:</kbd></td>"
+			Output += "<td><kbd>$" + (StartingRAM + ((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64)).toString(16) + " (!TileRAM+$" + ((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64).toString(16) + ")</kbd></td>"
+			Output += "</tr>"
+			Output += "<tr>"
+			Output += "<td><kbd>RAM address for !EnableUpload:</kbd></td>"
+			Output += "<td><kbd>$" + (StartingRAM + ((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64)+1).toString(16) + " (!TileRAM+$" + (((parseInt(NumbTopLines) + parseInt(NumbBottomLines))*64)+1).toString(16) + ")</kbd></td>"
+			Output += "</tr>"
+			Output += "</table>"
 		//Display table (TopLines)
 			var TilesAllCount = 0
 			var TopTilesCount = 0
@@ -69,8 +104,8 @@ to CTRL+F here on this HTML file (note that leading zeros and spaces are omitted
 					}
 					Output += "<tr>"
 					Output += "<td><kbd>Tile: " + TilesAllCount + " ($" + (TilesAllCount).toString(16) + ") Position: (" + (TopTilesCount % 32) + "," + (Math.floor(TopTilesCount/32)) + ") (($" + (TopTilesCount % 32).toString(16) + ",$" + (Math.floor(TopTilesCount/32)).toString(16) + "))</kbd></td>"
-					Output += "<td><kbd>$" + (parseInt(StartingRAM, 16) + TilesAllCount*2).toString(16) + " (!TileRAM+$" + (TilesAllCount*2).toString(16) + ")</kbd></td>"
-					Output += "<td><kbd>$" + ((parseInt(StartingRAM, 16) + TilesAllCount*2)+1).toString(16) + " (!TileRAM+$" + ((TilesAllCount*2)+1).toString(16) + ")</kbd></td>"
+					Output += "<td><kbd>$" + (StartingRAM + (TilesAllCount*2)).toString(16) + " (!TileRAM+$" + (TilesAllCount*2).toString(16) + ")</kbd></td>"
+					Output += "<td><kbd>$" + ((StartingRAM + (TilesAllCount*2))+1).toString(16) + " (!TileRAM+$" + ((TilesAllCount*2)+1).toString(16) + ")</kbd></td>"
 					Output += "</tr>"
 					
 					TilesAllCount++
@@ -91,8 +126,8 @@ to CTRL+F here on this HTML file (note that leading zeros and spaces are omitted
 					}
 					Output += "<tr>"
 					Output += "<td><kbd>Tile: " + TilesAllCount + " ($" + (TilesAllCount).toString(16) + ") Position: (" + (BottomTilesCount % 32) + "," + (Math.floor((BottomTilesCount/32)+26)) + ") (($" + (BottomTilesCount % 32).toString(16) + ",$" + (Math.floor((BottomTilesCount/32)+26)).toString(16) + "))</kbd></td>"
-					Output += "<td><kbd>$" + (parseInt(StartingRAM, 16) + TilesAllCount*2).toString(16) + " (!TileRAM+$" + (TilesAllCount*2).toString(16) + ")</kbd></td>"
-					Output += "<td><kbd>$" + ((parseInt(StartingRAM, 16) + TilesAllCount*2)+1).toString(16) + " (!TileRAM+$" + ((TilesAllCount*2)+1).toString(16) + ")</kbd></td>"
+					Output += "<td><kbd>$" + (StartingRAM + (TilesAllCount*2)).toString(16) + " (!TileRAM+$" + (TilesAllCount*2).toString(16) + ")</kbd></td>"
+					Output += "<td><kbd>$" + ((StartingRAM + (TilesAllCount*2))+1).toString(16) + " (!TileRAM+$" + ((TilesAllCount*2)+1).toString(16) + ")</kbd></td>"
 					Output += "</tr>"
 					
 					TilesAllCount++
