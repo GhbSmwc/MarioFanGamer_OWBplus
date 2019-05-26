@@ -155,13 +155,13 @@ What about Ladida's overworld counters?
 You can find them at this patch's thread.
 Why it's seperate code? Err... *runs*
 
-Help, I get screen glichtes?
+Help, I get screen glitches?
 ----------------------------------------------------------
-If there black scanlines then it is a NMI overflow.
-To keep it short, updating VRAM (where graphics and
-tilemap lies) is limited if outside of a black screen.
-The more tiles you upload, the more likely an overflow
-happens.
+If there black scanlines (or "black bars") then it is a
+NMI overflow. To keep it short, updating VRAM (where
+graphics and tilemap lies) is limited if outside of a
+black screen. The more tiles you upload, the more likely
+an overflow happens.
 My patch uploads each half alternating (quasi 30FPS) to
 dam the overflow but that still doesn't mean that it won't
 happen.
@@ -175,18 +175,15 @@ everything correctly and please contact me per PM if you
 are sure you made everything correctly and still get
 glitches.
 
-In case that the screen glitches but you can't see the
-border, you can simply set !EnableUpload to any non-zero
-value. That stops the border to upload tiles and saves a
-couple NMI time.
-
-GHB notes: you can disable the VRAM write by setting !EnableUpload
-to any nonzero number during events that would upload other
-tiles to the tilemap, since the OW border display is mainly
-a "heads-up-display" status bar for the OW, and that information
-presented (such as displaying coins, score, bonus stars) for
-most ASM hacks don't continuously change during the OW map, thus
-you can disable that during the expected NMI overflow.
+GHB notes: you can disable the VRAM write by setting the RAM
+!EnableUpload to any nonzero number during events that would
+upload other tiles to the tilemap (such as a custom menu on
+the center of the screen), since the OW border display is mainly
+a "heads-up-display status bar" for the OW, and that information
+presented (such as displaying coins, score, bonus stars, custom
+stuff like health, etc) don't change during the OW map (most
+of the actions are within levels), thus you can disable that
+during the expected NMI overflow.
 
 Help, I can't insert it!
 ----------------------------------------------------------
