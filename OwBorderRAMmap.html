@@ -43,12 +43,11 @@ to CTRL+F here on this HTML file (note that leading zeros and spaces are omitted
 		//reset it when submit button pressed again.
 			var Output = ""
 		//Prevent displaying invalid RAM address
-			var StartingRAM = parseInt(document.getElementById("TileRAM").value, 16)
+			var StartingRAM = clamp(parseInt(document.getElementById("TileRAM").value, 16), 0, parseInt("FFFFFF", 16))
 			if (isNaN(StartingRAM) == true) {
 				StartingRAM = parseInt("7FEC00", 16)
 				document.getElementById("TileRAM").value = "7FEC00"
 			} else {
-				StartingRAM = clamp(StartingRAM, parseInt("0", 16), parseInt("FFFFFF", 16))
 				document.getElementById("TileRAM").value = StartingRAM.toString(16)
 			}
 		//find out how many lines the user have entered
