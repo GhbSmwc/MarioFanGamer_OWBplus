@@ -43,8 +43,10 @@ at every 32nd tile. Because of that, the formula for the
 tiles is (simplified):
 
 	RAM_Offset = (X + ($20 * Y)) * 2
-	X is the X position ranging from 0-31 ($00-$1F)
-	Y is the Y position ranging from 0 to (TotalLines-1).
+	X is the X position (integers only) ranging from
+	 0-31 ($00-$1F), increases as you go right.
+	Y is the Y position (integers only) ranging from
+	 0 to (TotalLines-1), increases as you go down.
 
 after finding the offset, then you do this:
 
